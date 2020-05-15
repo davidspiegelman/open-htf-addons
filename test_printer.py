@@ -53,13 +53,15 @@ class TestPrinter():
 
         return wrapper
 
+'''
+Usage:
 
 @TestPrinter()
 def my_test_case(test):
     console_output.cli_print('Hello, World', logger=None)
 
 
-'''
+
 Sample Output:
 
 ==================== 0001: my_test_case ===================
