@@ -1,3 +1,24 @@
+'''
+Description:
+A decorator class for OpenHTF test phases that prints a header and a result
+
+Usage:
+
+@TestPrinter()
+def my_test_case(test):
+    console_output.cli_print('Hello, World', logger=None)
+
+
+
+Sample Output:
+
+==================== 0001: my_test_case ===================
+
+Hello, World
+result: PASS
+
+'''
+
 from openhtf.util import console_output
 import functools
 
@@ -52,20 +73,3 @@ class TestPrinter():
             return result
 
         return wrapper
-
-'''
-Usage:
-
-@TestPrinter()
-def my_test_case(test):
-    console_output.cli_print('Hello, World', logger=None)
-
-
-
-Sample Output:
-
-==================== 0001: my_test_case ===================
-
-Hello, World
-result: PASS
-'''
