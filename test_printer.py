@@ -39,7 +39,7 @@ class TestPrinter():
         def wrapper(*args, **kwargs):
             mem.test_printer_counter += 1
             test_api = args[0]
-            test_name = test_api.logger.name.split('.')[-1]
+            test_name = func.__name__
 
             # Print a banner. The test is about to begin
             console_output.banner_print(f'{mem.test_printer_counter:04}: {test_name}', logger=None)
