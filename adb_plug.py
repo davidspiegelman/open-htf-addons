@@ -6,7 +6,7 @@ Limitations:
 
 Requires adb_shell - https://github.com/JeffLIrion/adb_shell
 
-pip import 'adb_shell[usb]'
+pip install 'adb_shell[usb]'
 
 """
 import openhtf
