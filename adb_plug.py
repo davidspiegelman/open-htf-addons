@@ -64,4 +64,4 @@ class AdbPlug(openhtf.plugs.BasePlug):
 
 class AdbPlug1(AdbPlug):
     def __init__(self):
-        super().__init__(dict())
+        super().__init__(conf.plugs[self.get_subclass_name()])
