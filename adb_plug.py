@@ -6,47 +6,61 @@ Limitations:
 
 Requires adb_shell - https://github.com/JeffLIrion/adb_shell
 
-pip install 'adb_shell[usb]'
+pip import 'adb_shell[usb]'
 
 """
-import openhtf
-from openhtf.util import conf
+
 from adb_shell.adb_device import AdbDeviceUsb
 from adb_shell.auth.sign_pythonrsa import PythonRSASigner
 import os
+from plugs.ez_base_plug import EZBasePlug
+import psutil
+import time
 
 
-class AdbPlug(openhtf.plugs.BasePlug):
+class AdbPlug(EZBasePlug):
     '''
-    Communicate with DUT using ADB over USB
+    Communicate with DUT using adb protocol via USB
     '''
 
-    @classmethod
-    def get_subclass_name(cls):
-        return cls.__name__
-
-    def __init__(self, plug_config):
+    def __init__(self):
         super().__init__()
         subclass_name = self.get_subclass_name()
+        plug_config = self.get_plug_config()
 
         # set defaults here
         defaults = {'name': subclass_name,
-                    'rsa_key_path': os.path.expanduser('~/.android/adbkey'),
+                    'rsa_key_path': None,
                     'serial': None}
 
         # override defaults with plug config from station_config.yaml
         self._settings = dict(defaults, **plug_config)
         self.connected = False
-        with open(self._settings['rsa_key_path']) as f:
-            self.priv = f.read()
-        self.signer = PythonRSASigner('', self.priv)
+        self.priv = None
+        self.signer = None
+
+        # check if adb server is running. If it is, terminate it.
+        for proc in psutil.process_iter():
+            if proc.name() == 'adb':
+                proc.terminate()
+                time.sleep(1)
+                break
+
+        if self._settings['rsa_key_path'] == 'default':
+            self._settings['rsa_key_path'] = os.path.expanduser('~/.android/adbkey')
+
+        if self._settings['rsa_key_path']:
+            with open(self._settings['rsa_key_path']) as f:
+                self.priv = f.read()
+            self.signer = [PythonRSASigner('', self.priv)]
+
         self.device = AdbDeviceUsb(self._settings['serial'])
 
         self._connect()
-        assert self.connected, "Unable to connect to AdbUsb device"
+        assert self.connected, "Unable to connect to Adb Usb device"
 
     def _connect(self):
-        self.connected = self.device.connect(rsa_keys=[self.signer], auth_timeout_s=0.1)
+        self.connected = self.device.connect(rsa_keys=self.signer, auth_timeout_s=0.1)
 
     def _close(self):
         self.device.close()
@@ -61,7 +75,3 @@ class AdbPlug(openhtf.plugs.BasePlug):
     def tearDown(self):
         if self.connected:
             self._close()
-
-class AdbPlug1(AdbPlug):
-    def __init__(self):
-        super().__init__(conf.plugs[self.get_subclass_name()])
